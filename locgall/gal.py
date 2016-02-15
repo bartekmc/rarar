@@ -181,6 +181,7 @@ text-align: center;
     <div class="section" data-prevlink="1">
 
 <a id="prevlink" class="xyz" href="{{navi.prevLink()}}"><h1></h1></a>
+<!--
 <div class="sk-circle">
   <div class="sk-circle1 sk-child"></div>
   <div class="sk-circle2 sk-child"></div>
@@ -195,6 +196,7 @@ text-align: center;
   <div class="sk-circle11 sk-child"></div>
   <div class="sk-circle12 sk-child"></div>
 </div>
+-->
     </div>
     % end
 
@@ -207,6 +209,7 @@ text-align: center;
         <div class="slide">
             <div class="itemname">
 
+<!--
 <div class="sk-circle">
   <div class="sk-circle1 sk-child"></div>
   <div class="sk-circle2 sk-child"></div>
@@ -221,6 +224,7 @@ text-align: center;
   <div class="sk-circle11 sk-child"></div>
   <div class="sk-circle12 sk-child"></div>
 </div>
+-->
 
             </div>
         </div>
@@ -242,6 +246,7 @@ text-align: center;
         % if item.isDir():
         <div class="slide"> 
             <div style="width:50%; margin: 0 auto; text-align: center;">
+<!--
 <div class="sk-circle">
   <div class="sk-circle1 sk-child"></div>
   <div class="sk-circle2 sk-child"></div>
@@ -256,6 +261,7 @@ text-align: center;
   <div class="sk-circle11 sk-child"></div>
   <div class="sk-circle12 sk-child"></div>
 </div>
+-->
             <a class="xyz" href="{{item.openLink()}}"><h1> </h1></a>
             </div>
         </div>
@@ -267,6 +273,7 @@ text-align: center;
 % if navi.hasMoreLink():
     <div class="section" data-morelink="1">
             <div style="width:50%; margin: 0 auto; text-align: center;">
+<!--
 <div class="sk-circle">
   <div class="sk-circle1 sk-child"></div>
   <div class="sk-circle2 sk-child"></div>
@@ -281,6 +288,7 @@ text-align: center;
   <div class="sk-circle11 sk-child"></div>
   <div class="sk-circle12 sk-child"></div>
 </div>
+-->
 <a id="morelink" class="xyz" href="{{navi.moreLink()}}"><h1></h1></a>
             </div>
     </div>
@@ -365,7 +373,7 @@ console.log("bind"+e.which);
 
 @route('/')
 def red():
-    redirect('/r/')
+    redirect('/s/non/d/none/i/0/c/5/r/')
 
 class Navi(object):
     def __init__(self):
@@ -452,8 +460,8 @@ class Item(object):
         return self.__str__()
 
 
-@route('/s/<select>/i/<index:int>/c/<count:int>/r/')
-def root(select, index, count):
+@route('/s/<select>/d/<direction>/i/<index:int>/c/<count:int>/r/')
+def root(select, direction, index, count):
     path = os.curdir + os.sep
     return callbackxx(select, 'none', index, count, path)
 #    navi = Navi()
@@ -546,6 +554,7 @@ def callbackxx(select, direction, index, count, path):
     print index, index+dirsc+count
     return template(templ, navi=navi,  path=path, items=iii)
 
+
 @route('/r/<path:path>')
 def callback(path):
     navi = Navi()
@@ -566,42 +575,6 @@ def callback(path):
         iii.append(it)
     return template("AAAAAA{{path}}, {{items}} {{navi}}", navi=navi,  path=path, items=iii)
 
-@route('/f/i/<idx:int>/l/<le:int>/b/<bback>/r/<rem>/p/<path:path>')
-def indexb(idx, le, rem, bback,  path):
-    back = path.rsplit('/', 1)[0]
-    back_anchor = path.rsplit('/',1)[1]
-    print "Xx:"+back
-    print "Xx:"+back_anchor
-    
-    idx_next = idx+3
-    print path
-    items = os.listdir('./'+path)
-    print "AA", items
-    files = []
-    dirs = []
-    ids =   []
-    i = 0
-    for i in items:
-        print i
-        if os.path.isdir('./'+path+'/'+i):
-            dirs.append(path+'/'+i)
-        else:
-            files.append(path+'/'+i)
-            ids.append(str(i))
-    print '000:', dirs
-    print '999:', files
-            
-    #return template('<b>Hello {{name}}</b>!', name=dirs)
-    return template(templ, rem=rem, bback=bback, ids=ids, back_anchor=back_anchor, cur_path=path, dirs=dirs, files=files[idx:idx+3], back=back, idx_next=idx_next)
-
-
-@route('/f/i/<idx:int>/l/<le:int>/p/<path:path>')
-def index(idx, le, path):
-    return indexb(idx, le, 0, 0,  path)
-
-@route('/f/i/<idx:int>/l/<le:int>/r/<rem>/p/<path:path>')
-def indexc(idx, le, rem, path):
-    return indexb(idx, le, rem, 0,  path)
 
 
 
@@ -613,5 +586,5 @@ def indexx(name):
 def server_static(filepath):
     return static_file(filepath, root='.')
 
-run(host='192.168.1.102', port=8080)
+run(host='192.168.1.105', port=8080)
 
