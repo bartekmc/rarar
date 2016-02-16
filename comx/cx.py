@@ -3,18 +3,18 @@ from bottle import route, run, template, static_file, redirect
 import os
 import patoolib
 
-def p(var):
-    for k, v in list(locals().iteritems()):
-         if v is var:
-             print "%s:%s" % (k , v)
-             return
-    print '?'
+APP_PATH = '/home/B.Musialowski/Dokumenty/rarar/comx/'
+templ = open(os.path.join(APP_PATH, 'tmpl.html')).read()
 
-templ = "{{files}}"
-
-CACHE_PATH = os.path.join(os.path.abspath(os.curdir), '.cx')
+CACHE_PATH = os.path.join(os.path.abspath(APP_PATH), '.cx')
 if not os.path.isdir(CACHE_PATH):
     os.makedirs(CACHE_PATH)
+
+
+@route('/static/<path:path>')
+def staticfile(path):
+    return static_file(path, CACHE_PATH)
+
 
 @route('/f/<path:path>')
 def open_file(path):
@@ -24,67 +24,57 @@ def open_file(path):
         os.makedirs(path_cache)
         patoolib.extract_archive(path_file, outdir=path_cache)
 
-    files = os.listdir(path_cache)
+    pages = []
+    matches = []
+    for root, dirnames, filenames in os.walk(path_cache):
+        for filename in filenames:
+                matches.append(os.path.relpath(os.path.join(root, filename), path_cache))
 
+    print matches
+#    files = sorted(os.listdir(path_cache))
+    files = sorted(matches)
+    for f in files:
+        p = os.path.join(os.sep, 'static', path, f)
+        pages.append(p)
+
+    filest = []
+    dirst = []
     if os.path.isfile(path_file):
-        return template("{{filename}}<br\>{{path_cache}}<br/>{{files}}",files=files, filename=path_file, path_cache=path_cache)
+        return template(templ, dirs=None, comics=None, pages=pages)
+
     return template("bbuug")
+
+
+class Item:
+    def __init__(self):
+        self.name = None
+        self.link = None
 
 
 @route('/r/<path:path>')
 def path_walk(path):
     print path
     files_dirs = next(os.walk(os.curdir + os.sep + path))
-    files = files_dirs[2]
-    dirs = files_dirs[1]
+    filesx = files_dirs[2]
+    dirsx = files_dirs[1]
+    files = []
+    dirs = []
+    for f in filesx:
+        i = Item()
+        i.name = f
+        i.link = os.path.join('/f/', path, f) 
+        files.append(i)
+
+    for d in dirsx:
+        i = Item()
+        i.name = d
+        i.link = os.path.join('/r/', path, d)
+        dirs.append(i)
+
     print(files)
     print(dirs)
+    pages = []
 
-#    itemsd = sorted(itemsd)
-#    itemsf = sorted(itemsf)
-#    iii = []
-#    dirsc = 0
-#    print '3'
-#    if index == 0:
-#        for i in itemsd:
-#            print '3.'
-#            it = Item()
-#            it.navi = navi
-#            it.path = os.curdir + os.sep + path + i
-#            it.isDirx = True
-#            #if it.isDir() and index == 0:
-#            #    dirsc=dirsc+1
-#            if it.dirName() == select:
-#                it.isActive = True
-#
-#            #if (int(index) == 0 and it.isDir()) or not it.isDir():
-#            iii.append(it)
-#
-#    for i in itemsf[index:index+count]:
-#        it = Item()
-#        it.path = os.curdir + os.sep + path + i
-#            
-#        #if it.isDir() and index == 0:
-#        #    dirsc=dirsc+1
-#        #if it.dirName() == select:
-#        #    it.isActive = True
-#
-#        #if (int(index) == 0 and it.isDir()) or not it.isDir():
-#        iii.append(it)
-#
-#    if len(itemsf[index:index+count]) > 0:
-#        if direction == 'up':
-#            iii[-1].isActive = True
-#        elif direction == 'down':
-#            iii[0].isActive = True
-#
-#    print '4a'
-#        #iii = sorted(iii)
-#    print '4b'
-#    for x in iii:
-#        print x
-#
-#    print index, index+dirsc+count
-    return template(templ, files=files)
+    return template(templ, dirs=dirs, comics=files, pages=None)
 
 run(host='127.0.0.1', port=8080)
