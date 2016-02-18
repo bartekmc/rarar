@@ -1,9 +1,14 @@
 
-from bottle import route, run, template, static_file, redirect
+from bottle import route, run, template, static_file, redirect, hook, request
 import os
 import patoolib
 
-APP_PATH = '/home/B.Musialowski/Dokumenty/rarar/comx/'
+
+STATIC_PREFIX = '/static'
+STATIC_CACHE_PREFIX = '/cache'
+
+APP_PATH = os.path.dirname(os.path.realpath(__file__))
+
 templ = open(os.path.join(APP_PATH, 'tmpl.html')).read()
 
 CACHE_PATH = os.path.join(os.path.abspath(APP_PATH), '.cx')
@@ -11,9 +16,14 @@ if not os.path.isdir(CACHE_PATH):
     os.makedirs(CACHE_PATH)
 
 
-@route('/static/<path:path>')
-def staticfile(path):
+@route(STATIC_CACHE_PREFIX + '/<path:path>')
+def staticfile_cache(path):
     return static_file(path, CACHE_PATH)
+
+
+@route(STATIC_PREFIX + '/<path:path>')
+def staticfile(path):
+    return static_file(path, os.curdir)
 
 
 @route('/f/<path:path>')
@@ -28,17 +38,14 @@ def open_file(path):
     matches = []
     for root, dirnames, filenames in os.walk(path_cache):
         for filename in filenames:
-                matches.append(os.path.relpath(os.path.join(root, filename), path_cache))
+                matches.append(os.path.relpath(os.path.join(root, filename),
+                                               path_cache))
 
-    print matches
-#    files = sorted(os.listdir(path_cache))
     files = sorted(matches)
     for f in files:
-        p = os.path.join(os.sep, 'static', path, f)
+        p = os.path.join(os.sep, STATIC_CACHE_PREFIX, path, f)
         pages.append(p)
 
-    filest = []
-    dirst = []
     if os.path.isfile(path_file):
         return template(templ, dirs=None, comics=None, pages=pages)
 
@@ -49,10 +56,24 @@ class Item:
     def __init__(self):
         self.name = None
         self.link = None
+        self.directLink = None
+
+
+@route('')
+@route('/')
+def redirect_to_root_path():
+    return redirect('/r/')
+
+
+@route('/r')
+@route('/r/')
+def root_path():
+    return walk_path(os.curdir)
 
 
 @route('/r/<path:path>')
-def path_walk(path):
+@route('/r/<path:path>/')
+def walk_path(path):
     print path
     files_dirs = next(os.walk(os.curdir + os.sep + path))
     filesx = files_dirs[2]
@@ -60,9 +81,14 @@ def path_walk(path):
     files = []
     dirs = []
     for f in filesx:
+
+        if os.path.splitext(f)[1][0:3] != '.cb':
+            continue
+
         i = Item()
         i.name = f
-        i.link = os.path.join('/f/', path, f) 
+        i.link = os.path.join('/f/', path, f)
+        i.directLink = os.path.join(STATIC_PREFIX, path, f)
         files.append(i)
 
     for d in dirsx:
@@ -73,7 +99,6 @@ def path_walk(path):
 
     print(files)
     print(dirs)
-    pages = []
 
     return template(templ, dirs=dirs, comics=files, pages=None)
 

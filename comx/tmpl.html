@@ -21,6 +21,9 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/fotorama/4.6.4/fotorama.css" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fotorama/4.6.4/fotorama.js"></script>
 
+  <!-- bootstrap-autohidingnavbar -->
+  <script src="https://cdn.jsdelivr.net/bootstrap.autohidingnavbar/1.0.4/jquery.bootstrap-autohidingnavbar.min.js"></script>
+
   <!-- Just don’t want to repeat this prefix in every img[src] -->
   <!-- <base href="http://s.fotorama.io/okonechnikov/"> -->
 </head>
@@ -29,40 +32,94 @@
 <body>
 <script>
 $(document).ready(function() {
-$('.fotorama').on('fotorama:showend', function (e, fotorama) {
-  console.log(e.type, fotorama.activeIndex);
-    window.scrollTo(0,0);
+    $('.fotorama').on('fotorama:showend', function (e, fotorama) {
+        console.log(e.type, fotorama.activeIndex);
+        window.scrollTo(0,0);
+    });
+
+    $(".navbar").autoHidingNavbar({
+        disableAutohide:false,
+    });
 
 
+    $( ".fotorama" ).dblclick(function() {
 
-});
+        if ( $(".navbar").hasClass("navbar-hidden") ) 
+        {
+            $(".navbar").autoHidingNavbar('show');
+        }
+        else
+        {
+            $(".navbar").autoHidingNavbar('hide');
+        }
+    });
+
  });
 </script>
 
+<nav class="navbar navbar-inverse">
+ <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">ComixHost</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#about">Last</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+</nav>
+
+<div class="container">
+<div class="row">
 %if dirs is not None:
 <ul class="list-group">
 % for d in dirs:
-  <li class="list-group-item"><a href="{{d.link}}">{{d.name}}</a></li>
+  <li class="list-group-item">
+    <span class="glyphicon glyphicon-folder-open"></span> 
+<a href="{{d.link}}">{{d.name}}</a>
+
+</li>
 % end
 </ul>
 % end
-
+</div>
+<div class="row">
 %if comics is not None:
 <ul class="list-group">
 % for c in comics:
-  <li class="list-group-item"><a href="{{c.link}}">{{c.name}}</a></li>
+  <li class="list-group-item">
+
+    <span class="glyphicon glyphicon-file"></span> 
+    <a href="{{c.link}}">{{c.name}}</a>
+
+    <a href="{{c.directLink}}" class="btn btn-xs btn-success pull-right" role="button">
+            <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+    </a>
+
+</li>
 % end
 </ul>
 % end
 
+</div>
+<div class="row">
 %if pages is not None:
 <!-- Fotorama -->
-<div class="fotorama" data-width="100%" data-nav="false" data-max-width="100%">
+<div class="fotorama" data-click="false"  data-width="100%" data-nav="false" data-max-width="100%">
 % for p in pages:
   <a href="{{p}}"></a>
 % end
 </div>
 % end
 
+</div>
+</div>
 </body>
 </html>
