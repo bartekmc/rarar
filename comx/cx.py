@@ -46,8 +46,10 @@ def open_file(path):
         p = os.path.join(os.sep, STATIC_CACHE_PREFIX, path, f)
         pages.append(p)
 
+    back_link = os.path.join('/r/', os.path.split(path)[0])
+
     if os.path.isfile(path_file):
-        return template(templ, dirs=None, comics=None, pages=pages)
+        return template(templ, dirs=None, comics=None, pages=pages, back_link=back_link)
 
     return template("bbuug")
 
@@ -87,7 +89,7 @@ def walk_path(path):
 
         i = Item()
         i.name = f
-        i.link = os.path.join('/f/', path, f)
+        i.link = os.path.join('/f/', path, f) + "#2"
         i.directLink = os.path.join(STATIC_PREFIX, path, f)
         files.append(i)
 
@@ -97,9 +99,19 @@ def walk_path(path):
         i.link = os.path.join('/r/', path, d)
         dirs.append(i)
 
+    i = Item()
+    i.name = "COFNIJ"
+    i.link = os.path.join('/r/', os.path.split(path)[0])
+    if len(dirs) > 0:
+        dirs.insert(0, i)
+    else:
+        files.insert(0, i)
+
+    
+
     print(files)
     print(dirs)
 
     return template(templ, dirs=dirs, comics=files, pages=None)
 
-run(host='127.0.0.1', port=8080)
+run(host='192.168.1.105', port=8080)

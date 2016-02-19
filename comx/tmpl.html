@@ -112,10 +112,18 @@ $(document).ready(function() {
 <div class="row">
 %if pages is not None:
 <!-- Fotorama -->
-<div class="fotorama" data-click="false"  data-width="100%" data-nav="false" data-max-width="100%">
+<div class="fotorama" data-hash="true" data-click="false" data-keyboard="true" data-width="100%" data-nav="false" data-max-width="100%">
+
+  <div style="text-align:center"  class="any">
+    <a href="{{back_link}}"><h1>RETURN</h1></a>
+  </div>
+
 % for p in pages:
   <a href="{{p}}"></a>
 % end
+  <div style="text-align:center"  class="any">
+    <a href="{{back_link}}"><h1>RETURN</h1></a>
+  </div>
 </div>
 % end
 
