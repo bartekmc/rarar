@@ -76,7 +76,7 @@ def root_path():
 @route('/r/<path:path>')
 @route('/r/<path:path>/')
 def walk_path(path):
-    print path
+    #print path
     files_dirs = next(os.walk(os.curdir + os.sep + path))
     filesx = files_dirs[2]
     dirsx = files_dirs[1]
@@ -109,9 +109,9 @@ def walk_path(path):
 
     
 
-    print(files)
-    print(dirs)
+    #print(files)
+    #print(dirs)
 
     return template(templ, dirs=dirs, comics=files, pages=None)
 
-run(host='192.168.1.105', port=8080)
+run(host='127.0.0.1', port=8080)
