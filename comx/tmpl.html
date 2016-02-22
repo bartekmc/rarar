@@ -8,6 +8,14 @@
   <!-- jQuery -->
   <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
 
+  <!-- jQuery Mobile 
+  <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+  -->
+
+  <!-- Hammer.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.6/hammer.js"></script>
+  <script src="https://cdn.jsdelivr.net/jquery.hammerjs/2.0.0/jquery.hammer.js"></script>
+
   <!-- Latest compiled and minified CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 
@@ -34,6 +42,7 @@
 $(document).ready(function() {
     $('.fotorama').on('fotorama:showend', function (e, fotorama) {
         console.log(e.type, fotorama.activeIndex);
+        $(".navbar").autoHidingNavbar('hide');
         window.scrollTo(0,0);
     });
 
@@ -42,7 +51,7 @@ $(document).ready(function() {
     });
 
 
-    $( ".fotorama" ).dblclick(function() {
+    $( ".fotorama" ).hammer().bind("tap", function() {
 
         if ( $(".navbar").hasClass("navbar-hidden") ) 
         {
@@ -53,8 +62,8 @@ $(document).ready(function() {
             $(".navbar").autoHidingNavbar('hide');
         }
     });
-
  });
+
 </script>
 
 <nav class="navbar navbar-inverse">
