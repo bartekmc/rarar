@@ -99,9 +99,11 @@ $(document).ready(function() {
     <span class="glyphicon glyphicon-file"></span> 
     <a href="{{c.link}}">{{c.name}}</a>
 
+% if c.directLink is not None:
     <a href="{{c.directLink}}" class="btn btn-xs btn-success pull-right" role="button">
             <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
     </a>
+% end
 
 </li>
 % end
@@ -109,7 +111,7 @@ $(document).ready(function() {
 % end
 
 </div>
-<div class="row">
+</div>
 %if pages is not None:
 <!-- Fotorama -->
 <div class="fotorama" data-hash="true" data-click="false" data-keyboard="true" data-width="100%" data-nav="false" data-max-width="100%">
@@ -126,8 +128,5 @@ $(document).ready(function() {
   </div>
 </div>
 % end
-
-</div>
-</div>
 </body>
 </html>
