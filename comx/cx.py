@@ -39,6 +39,11 @@ class ComicHost(Bottle):
         self.route('/r/<path:path>', callback=self.walk_path)
         self.route('/r/<path:path>/', callback=self.walk_path)
 
+        self.route('/s/r/<path:path>/<page:int>', callback=self.saveX)
+
+    def saveX(self, path, page):
+        return template("{{X}} {{P}}", X=path, P=page)
+
     def clear_cache(self):
         if os.path.isdir(CACHE_PATH):
             shutil.rmtree(CACHE_PATH)
@@ -142,6 +147,6 @@ class ComicHost(Bottle):
 
 
 comicHost = ComicHost()
-comicHost.run(host='192.168.1.105', port=8080)
+comicHost.run(host='192.168.1.105', port=8080, reloader=True)
 
 

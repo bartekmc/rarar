@@ -34,6 +34,14 @@
 
   <!-- Just don’t want to repeat this prefix in every img[src] -->
   <!-- <base href="http://s.fotorama.io/okonechnikov/"> -->
+<style>
+.fotorama__img {
+    top: 0 !important;
+    width: 100% !important;
+    left: 0px !important;
+    margin-top: 0 !important;
+}
+</style>
 </head>
 
 
@@ -41,32 +49,44 @@
 <script>
 $(document).ready(function() {
     $('.fotorama').on('fotorama:showend', function (e, fotorama) {
+
+        console.log($(e.target).find('.any.last_page'));
+        if($(e.target).find('.fotorama__active .any.last_page').length != 0)
+        {
+            $.ajax({
+                    url: "/s{{back_link}}/5",
+                }).done(function() {
+                                    });
+        }
+
+
         console.log(e.type, fotorama.activeIndex);
-        $(".navbar").autoHidingNavbar('hide');
+        
+        $(".navbar-fixed-top").autoHidingNavbar('hide');
         window.scrollTo(0,0);
     });
 
-    $(".navbar").autoHidingNavbar({
+    $(".navbar-fixed-top").autoHidingNavbar({
         disableAutohide:false,
     });
 
 
     $( ".fotorama" ).hammer().bind("tap", function() {
 
-        if ( $(".navbar").hasClass("navbar-hidden") ) 
+        if ( $(".navbar-fixed-top").hasClass("navbar-hidden") ) 
         {
-            $(".navbar").autoHidingNavbar('show');
+            $(".navbar-fixed-top").autoHidingNavbar('show');
         }
         else
         {
-            $(".navbar").autoHidingNavbar('hide');
+            $(".navbar-fixed-top").autoHidingNavbar('hide');
         }
     });
  });
 
 </script>
 
-<nav class="navbar navbar-inverse">
+<nav class="navbar-fixed-top navbar-inverse">
  <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
             <span class="sr-only">Toggle navigation</span>
@@ -125,15 +145,15 @@ $(document).ready(function() {
 <!-- Fotorama -->
 <div class="fotorama" data-hash="true" data-click="false" data-keyboard="true" data-width="100%" data-nav="false" data-max-width="100%">
 
-  <div style="text-align:center"  class="any">
-    <a href="{{back_link}}"><h1>RETURN</h1></a>
+  <div id="first_page" style="text-align:center"  class="any">
+    <a href="{{back_link}}"><h1>RETURNy</h1></a>
   </div>
 
 % for p in pages:
   <a href="{{p}}"></a>
 % end
-  <div style="text-align:center"  class="any">
-    <a href="{{back_link}}"><h1>RETURN</h1></a>
+  <div style="text-align:center"  class="any last_page">
+    <a href="{{back_link}}"><h1>RETURNx</h1></a>
   </div>
 </div>
 % end
