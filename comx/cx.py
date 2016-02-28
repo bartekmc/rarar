@@ -2,6 +2,7 @@ from bottle import Bottle, route, run, template, static_file, redirect, hook, re
 import shutil
 import os
 import patoolib
+import urllib
 
 
 STATIC_PREFIX = '/static'
@@ -13,13 +14,43 @@ templ = open(os.path.join(APP_PATH, 'tmpl.html')).read()
 
 CACHE_PATH = os.path.join(os.path.abspath(APP_PATH), '.cx')
 
+DB_PATH = os.path.join(os.path.abspath(APP_PATH), '.db')
+if not os.path.isdir(DB_PATH):
+    os.makedirs(DB_PATH)
+DB_FILE = os.path.join(DB_PATH, 'db.file')
+
+
+html_escape_table = {
+    "&": "&amp;",
+    '"': "&quot;",
+    "'": "&apos;",
+    ">": "&gt;",
+    "<": "&lt;",
+}
+
+
+def html_escape(text):
+    """Produce entities within text."""
+    return "".join(html_escape_table.get(c, c) for c in text)
+
 
 class Item:
     def __init__(self):
         self.name = None
         self.link = None
         self.directLink = None
+        self.read_icon = False
+        self.finished_icon = False
 
+
+class HtmlObj:
+    def __init__(self):
+        self.pages = None
+        self.dirs = None
+        self.comics = None
+        self.back_link = None
+        self.saveX_link = ""
+        self.last_page = "2"
 
 class ComicHost(Bottle):
     def __init__(self):
@@ -42,6 +73,29 @@ class ComicHost(Bottle):
         self.route('/s/r/<path:path>/<page:int>', callback=self.saveX)
 
     def saveX(self, path, page):
+        path = urllib.unquote(path)
+        f = open(DB_FILE, 'r+')
+        flines = f.readlines()
+        #print flines
+        fout = []
+        needAdd = True 
+        for l in flines:
+            if path in l:
+                needAdd = False
+                fout.append(path + ',' + str(page))
+            else:
+                if l != '\n':
+                    fout.append(l)
+
+        if needAdd:
+            fout.append(path + ',' + str(page))
+        
+        print repr("write:"+ ''.join(fout))
+        f.seek(0)
+        f.truncate()
+        f.write(''.join(fout))
+        f.close()
+        
         return template("{{X}} {{P}}", X=path, P=page)
 
     def clear_cache(self):
@@ -67,6 +121,7 @@ class ComicHost(Bottle):
 
 #    @route('/f/<path:path>')
     def open_file(self, path):
+        hobj = HtmlObj()
         path_cache = os.path.join(CACHE_PATH, path)
         path_file = os.path.join(os.path.abspath(os.curdir), path)
         if not os.path.isdir(path_cache):
@@ -90,9 +145,24 @@ class ComicHost(Bottle):
 
         back_link = os.path.join('/r/', os.path.split(path)[0])
 
+        hobj.dirs = None
+        hobj.comics = None
+        hobj.pages = pages
+        hobj.last_page = '2' 
+        hobj.back_link = back_link
+
+        f = open(DB_FILE, 'r')
+        flines = f.readlines()
+        for l in flines:
+            #print path, l
+            if path in l:
+                hobj.last_page = int(l.split(',')[1])
+        f.close()
+
+        x = os.path.join('/s/r/', path)
+        hobj.saveX_link = urllib.quote(x)
         if os.path.isfile(path_file):
-            return template(templ, dirs=None, comics=None, pages=pages,
-                            back_link=back_link)
+            return template(templ, hobj=hobj)
 
         return template("bbuug")
 
@@ -109,7 +179,8 @@ class ComicHost(Bottle):
 #    @route('/r/<path:path>')
 #    @route('/r/<path:path>/')
     def walk_path(self, path):
-        print path
+        hobj = HtmlObj()
+        #print path
         files_dirs = next(os.walk(os.curdir + os.sep + path))
         filesx = files_dirs[2]
         dirsx = files_dirs[1]
@@ -122,9 +193,23 @@ class ComicHost(Bottle):
 
             i = Item()
             i.name = f
-            i.link = os.path.join('/f/', path, f) + "#2"
+            i.link = os.path.join('/f/', path, f) #+ "#2"
             i.directLink = os.path.join(STATIC_PREFIX, path, f)
             files.append(i)
+
+            fo = open(DB_FILE, 'r')
+            flines = fo.readlines()
+            #print path, f
+            last_page = 1
+            for lz in flines:
+                if os.path.join(path, f) in lz:
+                    print "lst page", os.path.join(path, f), int(lz.split(',')[1])
+                    last_page = int(lz.split(',')[1])
+            fo.close()
+            if last_page == 999:
+                i.finished_icon = True 
+            if last_page > 1 and last_page != 999:
+                i.read_icon = True
 
         for d in dirsx:
             i = Item()
@@ -140,13 +225,13 @@ class ComicHost(Bottle):
         else:
             files.insert(0, i)
 
-        print(files)
-        print(dirs)
-
-        return template(templ, dirs=dirs, comics=files, pages=None)
+        hobj.dirs = dirs
+        hobj.comics = files
+        hobj.pagers = None
+        return template(templ, hobj=hobj)
 
 
 comicHost = ComicHost()
-comicHost.run(host='192.168.1.105', port=8080, reloader=True)
+comicHost.run(host='0.0.0.0', port=8080, reloader=True)
 
 

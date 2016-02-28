@@ -48,16 +48,39 @@
 <body>
 <script>
 $(document).ready(function() {
+
+// 1. Initialize fotorama manually.
+    var $fotoramaDiv = $('.fotorama').fotorama();
+
+    // 2. Get the API object.
+    var fotorama = $fotoramaDiv.data('fotorama');
+    fotorama.show({{hobj.last_page}});
+
+
+
+
     $('.fotorama').on('fotorama:showend', function (e, fotorama) {
 
-        console.log($(e.target).find('.any.last_page'));
-        if($(e.target).find('.fotorama__active .any.last_page').length != 0)
-        {
+%if hobj.pages is not None:
+
+            if (fotorama.size == fotorama.activeIndex + 1)
+            {
             $.ajax({
-                    url: "/s{{back_link}}/5",
+                    url: "{{hobj.saveX_link}}/999",
                 }).done(function() {
                                     });
-        }
+
+            }
+            else
+            {
+            $.ajax({
+                    url: "{{hobj.saveX_link}}/"+fotorama.activeIndex,
+                }).done(function() {
+                                    });
+        
+            }
+
+% end
 
 
         console.log(e.type, fotorama.activeIndex);
@@ -66,12 +89,13 @@ $(document).ready(function() {
         window.scrollTo(0,0);
     });
 
+
     $(".navbar-fixed-top").autoHidingNavbar({
         disableAutohide:false,
     });
 
 
-    $( ".fotorama" ).hammer().bind("tap", function() {
+    $(".fotorama" ).hammer().bind("tap", function() {
 
         if ( $(".navbar-fixed-top").hasClass("navbar-hidden") ) 
         {
@@ -101,15 +125,16 @@ $(document).ready(function() {
             <li class="active"><a href="#">Home</a></li>
             <li><a href="#about">Last</a></li>
             <li><a href="#contact">Contact</a></li>
+            <li><a href="{{hobj.back_link}}">Back</a></li>
           </ul>
         </div><!--/.nav-collapse -->
 </nav>
 
 <div class="container">
 <div class="row">
-%if dirs is not None:
+%if hobj.dirs is not None:
 <ul class="list-group">
-% for d in dirs:
+% for d in hobj.dirs:
   <li class="list-group-item">
     <span class="glyphicon glyphicon-folder-open"></span> 
 <a href="{{d.link}}">{{d.name}}</a>
@@ -120,15 +145,25 @@ $(document).ready(function() {
 % end
 </div>
 <div class="row">
-%if comics is not None:
+%if hobj.comics is not None:
 <ul class="list-group">
-% for c in comics:
+% for c in hobj.comics:
   <li class="list-group-item">
+    % if not c.read_icon and not c.finished_icon:
+        <span class="glyphicon glyphicon-file"></span> 
+    % end
+    % if c.read_icon:
+        <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+    % end
 
-    <span class="glyphicon glyphicon-file"></span> 
+    % if c.finished_icon:
+        <span class="glyphicon glyphicon-check" aria-hidden="true"></span>
+    % end
+
     <a href="{{c.link}}">{{c.name}}</a>
 
 % if c.directLink is not None:
+
     <a href="{{c.directLink}}" class="btn btn-xs btn-success pull-right" role="button">
             <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
     </a>
@@ -141,19 +176,19 @@ $(document).ready(function() {
 
 </div>
 </div>
-%if pages is not None:
+%if hobj.pages is not None:
 <!-- Fotorama -->
 <div class="fotorama" data-hash="true" data-click="false" data-keyboard="true" data-width="100%" data-nav="false" data-max-width="100%">
 
   <div id="first_page" style="text-align:center"  class="any">
-    <a href="{{back_link}}"><h1>RETURNy</h1></a>
+    <a href="{{hobj.back_link}}"><h1>RETURNy</h1></a>
   </div>
 
-% for p in pages:
+% for p in hobj.pages:
   <a href="{{p}}"></a>
 % end
   <div style="text-align:center"  class="any last_page">
-    <a href="{{back_link}}"><h1>RETURNx</h1></a>
+    <a href="{{hobj.back_link}}"><h1>RETURNx</h1></a>
   </div>
 </div>
 % end
