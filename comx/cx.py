@@ -15,23 +15,12 @@ templ = open(os.path.join(APP_PATH, 'tmpl.html')).read()
 CACHE_PATH = os.path.join(os.path.abspath(APP_PATH), '.cx')
 
 DB_PATH = os.path.join(os.path.abspath(APP_PATH), '.db')
-if not os.path.isdir(DB_PATH):
-    os.makedirs(DB_PATH)
+
 DB_FILE = os.path.join(DB_PATH, 'db.file')
 
-
-html_escape_table = {
-    "&": "&amp;",
-    '"': "&quot;",
-    "'": "&apos;",
-    ">": "&gt;",
-    "<": "&lt;",
-}
-
-
-def html_escape(text):
-    """Produce entities within text."""
-    return "".join(html_escape_table.get(c, c) for c in text)
+if not os.path.isdir(DB_PATH):
+    os.makedirs(DB_PATH)
+    fdb = open(DB_FILE, 'w+')
 
 
 class Item:
@@ -51,6 +40,7 @@ class HtmlObj:
         self.back_link = None
         self.saveX_link = ""
         self.last_page = "2"
+
 
 class ComicHost(Bottle):
     def __init__(self):
@@ -182,8 +172,8 @@ class ComicHost(Bottle):
         hobj = HtmlObj()
         #print path
         files_dirs = next(os.walk(os.curdir + os.sep + path))
-        filesx = files_dirs[2]
-        dirsx = files_dirs[1]
+        filesx = sorted(files_dirs[2])
+        dirsx = sorted(files_dirs[1])
         files = []
         dirs = []
         for f in filesx:
