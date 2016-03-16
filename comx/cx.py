@@ -4,6 +4,15 @@ import os
 import patoolib
 import urllib
 
+import threading
+
+
+
+#threads = []
+#for i in range(5):
+#    t = threading.Thread(target=worker)
+#    threads.append(t)
+#    t.start()
 
 STATIC_PREFIX = '/static'
 STATIC_CACHE_PREFIX = '/cache'
@@ -38,8 +47,12 @@ class HtmlObj:
         self.dirs = None
         self.comics = None
         self.back_link = None
+        self.image_src = None
         self.saveX_link = ""
         self.last_page = "2"
+        self.prev_page = "2"
+        self.cur_page = "2"
+        self.next_page = "2"
 
 
 class ComicHost(Bottle):
@@ -52,6 +65,7 @@ class ComicHost(Bottle):
         self.route(STATIC_CACHE_PREFIX + '/<path:path>',
                    callback=self.staticfile_cache)
         self.route(STATIC_PREFIX + '/<path:path>', callback=self.staticfile)
+        self.route('/f/<path:path>/page/<page:int>', callback=self.open_file_a)
         self.route('/f/<path:path>', callback=self.open_file)
         self.route('', callback=self.redirect_to_root_path)
         self.route('/', callback=self.redirect_to_root_path)
@@ -75,12 +89,12 @@ class ComicHost(Bottle):
                 fout.append(path + ',' + str(page))
             else:
                 if l != '\n':
-                    fout.append(l)
+                    fout.append(l.strip())
 
         if needAdd:
             fout.append(path + ',' + str(page))
         
-        print repr("write:"+ ''.join(fout))
+        print repr("write:"+ '\n'.join(fout))
         f.seek(0)
         f.truncate()
         f.write(''.join(fout))
@@ -109,14 +123,137 @@ class ComicHost(Bottle):
     def staticfile(self, path):
         return static_file(path, os.curdir)
 
+    def unpack(self, path_file, path_cache):
+        """thread worker function"""
+        print 'Unpack:', path_file, path_cache 
+        patoolib.extract_archive(path_file, outdir=path_cache)
+        self.cache_items.append(path_cache)
+        self.trim_cache()
+        return
+
+
+
+    def open_file_a(self, path, page):
+        hobj = HtmlObj()
+        print "========"
+        print path, path, path
+        print "========"
+
+#        if os.path.isfile(path):
+#            pass
+
+        path_cache = os.path.join(CACHE_PATH, path)
+        path_file = os.path.join(os.path.abspath(os.curdir), path)
+        pages = []
+        matches = []
+
+        #jezeli jest cache
+        print "Y:", path_cache
+        if not os.path.isdir(path_cache):
+            os.makedirs(path_cache)
+
+            print repr(patoolib.list_archive(path_file))
+            import rarfile
+
+            rf = rarfile.RarFile(path_file)
+            xxfiles = rf.namelist()
+#            for f in rf.namelist():
+#                print f.filename, f.file_size
+#                if f.filename == 'README':
+#                    print(rf.read(f))
+
+            t = threading.Thread(target=self.unpack, args=(path_file, path_cache))
+#            threads.append(t)
+            t.start()
+
+#            patoolib.extract_archive(path_file, outdir=path_cache)
+
+            for f in xxfiles:
+                #matches.append(os.path.relpath(os.path.join(path_cache, f)))
+                #print "XXXXXXXXXXXXXXX:", os.path.join(path_cache, f)
+#                matches.append(os.path.relpath(os.path.join(root, filename),path_cache))
+                matches.append(f)
+
+        else:
+            import rarfile
+
+            rf = rarfile.RarFile(path_file)
+            xxfiles = rf.namelist()
+            for f in xxfiles:
+                #matches.append(os.path.relpath(os.path.join(path_cache, f)))
+                #print "XXXXXXXXXXXXXXX:", os.path.join(path_cache, f)
+#                matches.append(os.path.relpath(os.path.join(root, filename),path_cache))
+                matches.append(f)
+#            for root, dirnames, filenames in os.walk(path_cache):
+#                for filename in filenames:
+#                        matches.append(os.path.relpath(os.path.join(root,
+#                                                                filename),
+#                                                   path_cache))
+
+        print "X:", matches
+
+        files = sorted(matches)
+        x = int(1)
+        for f in files:
+            #p = os.path.join(os.sep, STATIC_CACHE_PREFIX, path, f)
+#            p = os.path.join(os.sep, 'f/', path, f)
+            p = os.path.join(os.sep, 'f/', path, 'page', str(x))
+            pages.append(p)
+            x+=1
+        print pages
+
+        back_link = os.path.join('/r/', os.path.split(path)[0])
+
+        hobj.dirs = None
+        hobj.comics = None
+        hobj.image_src = os.path.join(os.sep, STATIC_CACHE_PREFIX, path, files[page])
+        print "000000000"
+        print os.sep, STATIC_CACHE_PREFIX, path, files[page]
+        print hobj.image_src
+        print "000000000"
+        hobj.pages = pages
+        hobj.prev_page = pages[page-1] 
+        hobj.cur_page = pages[page] 
+        print "1========"
+        print path
+        print "1========"
+#        hobj.next_page = os.path.join('/f/', path, pages[page+1])
+        hobj.next_page = pages[page+1]
+        hobj.last_page = '2' 
+        hobj.back_link = back_link
+
+        f = open(DB_FILE, 'r')
+        flines = f.readlines()
+        for l in flines:
+            #print path, l
+            if path in l:
+                hobj.last_page = int(l.split(',')[1])
+        f.close()
+
+        x = os.path.join('/s/r/', path)
+        hobj.saveX_link = urllib.quote(x)
+        if os.path.isfile(path_file):
+            return template(templ, hobj=hobj)
+
+        return template("bbuug")
+
 #    @route('/f/<path:path>')
     def open_file(self, path):
+        pass
+        return
+#        return self.open_file_a(path, 0)
+
         hobj = HtmlObj()
         path_cache = os.path.join(CACHE_PATH, path)
         path_file = os.path.join(os.path.abspath(os.curdir), path)
         if not os.path.isdir(path_cache):
             os.makedirs(path_cache)
-            patoolib.extract_archive(path_file, outdir=path_cache)
+
+            t = threading.Thread(target=self.unpack, args=(path_file, path_cache))
+#            threads.append(t)
+            t.start()
+
+#            patoolib.extract_archive(path_file, outdir=path_cache)
             self.cache_items.append(path_cache)
             self.trim_cache()
 
@@ -138,6 +275,9 @@ class ComicHost(Bottle):
         hobj.dirs = None
         hobj.comics = None
         hobj.pages = pages
+        hobj.prev_page = "1"
+        hobj.cur_page = pages[0] 
+        hobj.next_page = pages[1]
         hobj.last_page = '2' 
         hobj.back_link = back_link
 
@@ -170,7 +310,7 @@ class ComicHost(Bottle):
 #    @route('/r/<path:path>/')
     def walk_path(self, path):
         hobj = HtmlObj()
-        #print path
+        print path
         files_dirs = next(os.walk(os.curdir + os.sep + path))
         filesx = sorted(files_dirs[2])
         dirsx = sorted(files_dirs[1])
@@ -183,8 +323,8 @@ class ComicHost(Bottle):
 
             i = Item()
             i.name = f
-            i.link = os.path.join('/f/', path, f) #+ "#2"
-            i.directLink = os.path.join(STATIC_PREFIX, path, f)
+            i.link = os.path.join('/f/', path, f, 'page', str(1))
+            i.directLink = os.path.join(STATIC_PREFIX, path, f )
             files.append(i)
 
             fo = open(DB_FILE, 'r')
@@ -193,7 +333,8 @@ class ComicHost(Bottle):
             last_page = 1
             for lz in flines:
                 if os.path.join(path, f) in lz:
-                    print "lst page", os.path.join(path, f), int(lz.split(',')[1])
+                    print "lz:", lz
+                    print "lst page:", lz, os.path.join(path, f), int(lz.split(',')[1])
                     last_page = int(lz.split(',')[1])
             fo.close()
             if last_page == 999:

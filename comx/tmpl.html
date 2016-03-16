@@ -48,6 +48,9 @@ body{
 }
 % end
 
+.fotorama__wrap {
+    margin: 0 auto;
+}
 </style>
 </head>
 
@@ -56,45 +59,59 @@ body{
 <script>
 $(document).ready(function() {
 
+
+$("img").load(function(){
+        console.log('Image is loaded!\n');
+    })
+    .error(function(){
+        console.log('Image is not loaded!\n');
+        // in this case you must reload image with jQuery
+        setTimeout(function(ss){
+            var imgSrc = $(ss).attr('src');
+            $(ss).attr('src',imgSrc);
+        }, 1000, this);
+});
+
+
 // 1. Initialize fotorama manually.
-    var $fotoramaDiv = $('.fotorama').fotorama();
+//    var $fotoramaDiv = $('.fotorama').fotorama();
 
     // 2. Get the API object.
-    var fotorama = $fotoramaDiv.data('fotorama');
-    fotorama.show({{hobj.last_page}});
+//    var fotorama = $fotoramaDiv.data('fotorama');
+//    fotorama.show({{hobj.last_page}});
 
 
 
 
-    $('.fotorama').on('fotorama:showend', function (e, fotorama) {
+//   $('.fotorama').on('fotorama:showend', function (e, fotorama) {
 
 %if hobj.pages is not None:
 
-            if (fotorama.size == fotorama.activeIndex + 1)
-            {
-            $.ajax({
-                    url: "{{hobj.saveX_link}}/999",
-                }).done(function() {
-                                    });
-
-            }
-            else
-            {
-            $.ajax({
-                    url: "{{hobj.saveX_link}}/"+fotorama.activeIndex,
-                }).done(function() {
-                                    });
-        
-            }
+ //           if (fotorama.size == fotorama.activeIndex + 1)
+  //          {
+   //         $.ajax({
+    //                url: "{{hobj.saveX_link}}/999",
+     //           }).done(function() {
+      //                              });
+//
+ //           }
+  //          else
+   //         {
+    //        $.ajax({
+     //               url: "{{hobj.saveX_link}}/"+fotorama.activeIndex,
+      //          }).done(function() {
+       //                             });
+       // 
+        //    }
 
 % end
 
 
-        console.log(e.type, fotorama.activeIndex);
+//        console.log(e.type, fotorama.activeIndex);
         
-        $(".navbar-fixed-top").autoHidingNavbar('hide');
-        window.scrollTo(0,0);
-    });
+ //       $(".navbar-fixed-top").autoHidingNavbar('hide');
+  //      window.scrollTo(0,0);
+   // });
 
 
     $(".navbar-fixed-top").autoHidingNavbar({
@@ -183,21 +200,9 @@ $(document).ready(function() {
 
 </div>
 </div>
-%if hobj.pages is not None:
-<!-- Fotorama -->
-<div class="fotorama" data-hash="true" data-click="false" data-keyboard="true" data-width="100%" data-nav="false" data-max-width="100%">
 
-  <div id="first_page" style="text-align:center"  class="any">
-    <a href="{{hobj.back_link}}"><h1>RETURNy</h1></a>
-  </div>
+<img src="{{hobj.image_src}}"></img>
 
-% for p in hobj.pages:
-  <a href="{{p}}"></a>
-% end
-  <div style="text-align:center"  class="any last_page">
-    <a href="{{hobj.back_link}}"><h1>RETURNx</h1></a>
-  </div>
-</div>
-% end
+<a href="{{hobj.next_page}}">NNNEEEXXXTTT</a>
 </body>
 </html>
