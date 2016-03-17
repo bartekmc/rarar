@@ -85,7 +85,25 @@ $("#img_page").load(function(){
 //    fotorama.show({{hobj.last_page}});
 
 
+//var myElement = document.getElementById('img_page');
 
+//var mc = new Hammer.Manager(myElement);
+
+// create a pinch and rotate recognizer
+// these require 2 pointers
+//var pinch = new $('#img_page').hammer.Pinch();
+//var rotate = new Hammer.Rotate();
+
+// we want to detect both the same time
+//pinch.recognizeWith(rotate);
+
+// add to the Manager
+//mc.add([pinch, rotate]);
+
+
+//mc.on("pinch rotate", function(ev) {
+ //   myElement.textContent += ev.type +" ";
+//});
 
 //   $('.fotorama').on('fotorama:showend', function (e, fotorama) {
 
@@ -123,10 +141,10 @@ $("#img_page").load(function(){
     });
 
 
-    $("#img_page" ).hammer().bind("tap", function(event) {
-        console.log(event.pointers);
-        console.log(event.center);
-
+    $("#img_page" ).hammer({touchAction : 'auto'}).bind("tap", function(event) {
+ //       console.log(event.pointers);
+  //      console.log(event.center);
+//
 
         if ( $(".navbar-fixed-top").hasClass("navbar-hidden") ) 
         {
@@ -137,6 +155,14 @@ $("#img_page").load(function(){
             $(".navbar-fixed-top").autoHidingNavbar('hide');
         }
     });
+//    $("#img_page" ).data("hammer").get('pinch').set({ enable: false });
+
+ //   $("#img_page" ).hammer({prevent_default:true}).bind("pinchin", function() {
+//console.log("pinchin");
+//});
+ //   $("#img_page" ).hammer({prevent_default:true}).bind("pinchout", function() {
+//console.log("pinchout");
+//});
  });
 
 </script>
@@ -206,13 +232,15 @@ $("#img_page").load(function(){
 % end
 
 </div>
-</div>
 
+<div class="row">
 % if hobj.pages is not None:
 <img id="img_page" src="{{hobj.image_src}}"></img>
 <a href="{{hobj.prev_page}}">PREV</a>
 <a href="{{hobj.next_page}}">NNNEEEXXXTTT</a>
 % end
+</div>
+</div>
 
 
 </body>
