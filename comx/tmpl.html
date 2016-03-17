@@ -42,6 +42,10 @@
     margin-top: 0 !important;
 }
 
+#img_page{
+    width: 100%;
+}
+
 % if hobj.dirs is not None:
 body{
     padding-top:70px;
@@ -60,7 +64,7 @@ body{
 $(document).ready(function() {
 
 
-$("img").load(function(){
+$("#img_page").load(function(){
         console.log('Image is loaded!\n');
     })
     .error(function(){
@@ -201,8 +205,12 @@ $("img").load(function(){
 </div>
 </div>
 
-<img src="{{hobj.image_src}}"></img>
-
+% if hobj.pages is not None:
+<img id="img_page" src="{{hobj.image_src}}"></img>
+<a href="{{hobj.prev_page}}">PREV</a>
 <a href="{{hobj.next_page}}">NNNEEEXXXTTT</a>
+% end
+
+
 </body>
 </html>
