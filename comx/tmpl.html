@@ -123,7 +123,10 @@ $("#img_page").load(function(){
     });
 
 
-    $(".fotorama" ).hammer().bind("tap", function() {
+    $("#img_page" ).hammer().bind("tap", function(event) {
+        console.log(event.pointers);
+        console.log(event.center);
+
 
         if ( $(".navbar-fixed-top").hasClass("navbar-hidden") ) 
         {
