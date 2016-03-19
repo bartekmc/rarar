@@ -55,6 +55,31 @@ body{
 .fotorama__wrap {
     margin: 0 auto;
 }
+.page_container{
+position:relative;
+}
+.page_prev{
+position:absolute;
+top:0px;
+width:30%;
+height:100%;
+
+}
+.page_next{
+position:absolute;
+top:0px;
+right:0px;
+width:30%;
+height:100%;
+}
+.page_menu{
+position:absolute;
+top:0px;
+right:30%;
+left:30%;
+height:100px;
+
+}
 </style>
 </head>
 
@@ -62,6 +87,7 @@ body{
 <body>
 <script>
 $(document).ready(function() {
+
 
 
 $("#img_page").load(function(){
@@ -140,21 +166,36 @@ $("#img_page").load(function(){
         disableAutohide:false,
     });
 
+    $(".navbar-fixed-top").autoHidingNavbar('hide');
 
-    $("#img_page" ).hammer({touchAction : 'auto'}).bind("tap", function(event) {
+//        $(".navbar-fixed-top").autoHidingNavbar('hide');
+
+$(".page_menu").click(function(){
+
+ if ( $(".navbar-fixed-top").hasClass("navbar-hidden") ) 
+   {
+     $(".navbar-fixed-top").autoHidingNavbar('show');
+      }
+       else
+        
+        $(".navbar-fixed-top").autoHidingNavbar('hide');
+}
+);
+
+//    $("#img_page" ).hammer({touchAction : 'auto'}).bind("tap", function(event) {
  //       console.log(event.pointers);
   //      console.log(event.center);
 //
 
-        if ( $(".navbar-fixed-top").hasClass("navbar-hidden") ) 
-        {
-            $(".navbar-fixed-top").autoHidingNavbar('show');
-        }
-        else
-        {
-            $(".navbar-fixed-top").autoHidingNavbar('hide');
-        }
-    });
+ ////       if ( $(".navbar-fixed-top").hasClass("navbar-hidden") ) 
+   ////     {
+     //       $(".navbar-fixed-top").autoHidingNavbar('show');
+      //  }
+       // else
+        //{
+         //   $(".navbar-fixed-top").autoHidingNavbar('hide');
+//        }
+ //   });
 //    $("#img_page" ).data("hammer").get('pinch').set({ enable: false });
 
  //   $("#img_page" ).hammer({prevent_default:true}).bind("pinchin", function() {
@@ -233,14 +274,21 @@ $("#img_page").load(function(){
 
 </div>
 
-<div class="row">
+
+</div>
+<!-- <div class="row">
+-->
 % if hobj.pages is not None:
+<div class="page_container">
 <img id="img_page" src="{{hobj.image_src}}"></img>
-<a href="{{hobj.prev_page}}">PREV</a>
-<a href="{{hobj.next_page}}">NNNEEEXXXTTT</a>
+<div class="page_menu"></div>
+<a class="page_prev" href="{{hobj.prev_page}}"></a>
+<a class="page_next" href="{{hobj.next_page}}"></a>
+</div>
 % end
+<!--
 </div>
-</div>
+-->
 
 
 </body>

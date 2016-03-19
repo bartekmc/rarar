@@ -5,8 +5,25 @@ import patoolib
 import urllib
 
 import threading
+import PIL
+from PIL import Image
 
-
+def resize(im, percent):
+    """ retaille suivant un pourcentage 'percent' """
+    w, h = im.size
+    return im.resize(((percent*w)/100, (percent*h)/100))
+def resize2(im, pixels):
+    """ retaille e le plus long en 'pixels' 
+        (pour tenir dans une frame de pixels x pixels)
+    """
+    (wx, wy) = im.size
+    rx = 1.0*wx/pixels
+    ry = 1.0*wy/pixels
+    if rx > ry:
+        rr = rx
+    else:
+        rr = ry
+    return im.resize((int(wx/rr), int(wy/rr)))
 
 #threads = []
 #for i in range(5):
@@ -130,6 +147,16 @@ class ComicHost(Bottle):
         patoolib.extract_archive(path_file, outdir=path_cache)
         self.cache_items.append(path_cache)
         self.trim_cache()
+
+        for root, dirnames, filenames in os.walk(path_cache):
+            for filename in filenames:
+                    ff = os.path.relpath(os.path.join(root, filename))
+                    im = Image.open(ff)
+                    im = resize(im, 70)
+                    r = os.path.split(ff) 
+                    im.save(os.path.join(r[0], "bmc_"+r[1]))
+                    print "resize:", os.path.relpath(os.path.join(root, filename))
+
         return
 
 
@@ -156,7 +183,8 @@ class ComicHost(Bottle):
 
 
             for f in xxfiles:
-                matches.append(f)
+                if "bmc_" not in f:
+                    matches.append(f)
 
         else:
             import rarfile
@@ -175,9 +203,12 @@ class ComicHost(Bottle):
 
         back_link = os.path.join('/r/', os.path.split(path)[0])
 
+        if page ==999:
+            page = len(files)-1
         hobj.dirs = None
         hobj.comics = None
-        hobj.image_src = os.path.join(os.sep, STATIC_CACHE_PREFIX, path, files[page])
+        #hobj.image_src = os.path.join(os.sep, STATIC_CACHE_PREFIX, path, files[page])
+        hobj.image_src = os.path.join(os.sep, STATIC_CACHE_PREFIX, path, "bmc_"+files[page])
 
         hobj.pages = pages
         hobj.prev_page = pages[page-2] 
