@@ -171,12 +171,12 @@ class ComicHost(Bottle):
     def staticfile(self, path):
         return static_file(path, os.curdir)
 
-    def unpack(self, path_file, path_cache):
+    def unpack(self, path_file, path_cache, page=0):
         """thread worker function"""
         print 'Unpack:', path_file, path_cache 
 
         #patoolib.extract_archive(path_file, outdir=path_cache)
-        u = Unpack(path_file, path_cache)
+        u = Unpack(path_file, path_cache, page)
         u.unpack()
 
         self.cache_items.append(path_cache)
@@ -211,7 +211,10 @@ class ComicHost(Bottle):
             rf = rarfile.RarFile(path_file)
             xxfiles = rf.namelist()
 
-            t = threading.Thread(target=self.unpack, args=(path_file, path_cache))
+            xpage = page
+            if xpage ==999:
+                xpage = len(xxfiles)-1
+            t = threading.Thread(target=self.unpack, args=(path_file, path_cache, xpage))
             t.start()
 
 
@@ -266,7 +269,8 @@ class ComicHost(Bottle):
 
         x = os.path.join('/s/r/', path)
         hobj.saveX_link = urllib.quote(x)
-        if (len(pages)>=page):
+        print "ZZZZ", len(pages), page
+        if (page >= len(pages)):
             self.saveX(hobj.saveX_link, 999)
         else:
             self.saveX(hobj.saveX_link, page)
