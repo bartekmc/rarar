@@ -1,12 +1,20 @@
 from bottle import Bottle, route, run, template, static_file, redirect, hook, request
 import shutil
 import os
-import patoolib
+#import patoolib
 import urllib
 
 import threading
 import PIL
 from PIL import Image
+import rarfile
+
+from operator import itemgetter, attrgetter, methodcaller
+
+rarfile.PATH_SEP = '/'
+
+
+
 
 def resize(im, percent):
     """ retaille suivant un pourcentage 'percent' """
@@ -24,6 +32,28 @@ def resize2(im, pixels):
     else:
         rr = ry
     return im.resize((int(wx/rr), int(wy/rr)))
+
+class Unpack:
+    def __init__(self, archive_path_file, out_dir, page=0):
+        self.archive = archive_path_file
+        self.page = page
+        self.out_dir = out_dir
+
+    def unpack(self, obsr=None):
+        rar = rarfile.RarFile(self.archive)
+        rfiles = rar.infolist()
+        rfiles = sorted(rfiles, key=attrgetter('filename'))
+        rfiles = rfiles[self.page:] + rfiles[:self.page]
+        for i in rfiles:
+            rar.extract(i, self.out_dir)
+            #im = Image.open(os.path.join(self.out_dir, i.filename))
+            print os.path.join(self.out_dir, i.filename)
+            ff = os.path.relpath(os.path.join(self.out_dir, i.filename))
+            im = Image.open(ff)
+            im = resize(im, 70)
+            r = os.path.split(ff) 
+            im.save(os.path.join(r[0], "bmc_"+r[1]))
+            print "resize:", os.path.join(self.out_dir, i.filename)
 
 #threads = []
 #for i in range(5):
@@ -144,18 +174,22 @@ class ComicHost(Bottle):
     def unpack(self, path_file, path_cache):
         """thread worker function"""
         print 'Unpack:', path_file, path_cache 
-        patoolib.extract_archive(path_file, outdir=path_cache)
+
+        #patoolib.extract_archive(path_file, outdir=path_cache)
+        u = Unpack(path_file, path_cache)
+        u.unpack()
+
         self.cache_items.append(path_cache)
         self.trim_cache()
 
-        for root, dirnames, filenames in os.walk(path_cache):
-            for filename in filenames:
-                    ff = os.path.relpath(os.path.join(root, filename))
-                    im = Image.open(ff)
-                    im = resize(im, 70)
-                    r = os.path.split(ff) 
-                    im.save(os.path.join(r[0], "bmc_"+r[1]))
-                    print "resize:", os.path.relpath(os.path.join(root, filename))
+#        for root, dirnames, filenames in os.walk(path_cache):
+#            for filename in filenames:
+#                    ff = os.path.relpath(os.path.join(root, filename))
+#                    im = Image.open(ff)
+#                    im = resize(im, 70)
+#                    r = os.path.split(ff) 
+#                    im.save(os.path.join(r[0], "bmc_"+r[1]))
+#                    print "resize:", os.path.relpath(os.path.join(root, filename))
 
         return
 
@@ -172,8 +206,7 @@ class ComicHost(Bottle):
         if not os.path.isdir(path_cache):
             os.makedirs(path_cache)
 
-            print repr(patoolib.list_archive(path_file))
-            import rarfile
+#            print repr(patoolib.list_archive(path_file))
 
             rf = rarfile.RarFile(path_file)
             xxfiles = rf.namelist()
@@ -187,7 +220,6 @@ class ComicHost(Bottle):
                     matches.append(f)
 
         else:
-            import rarfile
 
             rf = rarfile.RarFile(path_file)
             xxfiles = rf.namelist()
