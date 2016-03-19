@@ -281,10 +281,12 @@ $(".page_menu").click(function(){
 % if hobj.pages is not None:
 <div class="page_container">
 <img id="img_page" src="{{hobj.image_src}}"></img>
-<a href="{{hobj.prev_page}}">PREV</a>
-<a href="{{hobj.next_page}}">NNNEEEXXXTTT</a>
+<div class="page_menu"></div>
+<a class="page_prev" href="{{hobj.prev_page}}"></a>
+<a class="page_next" href="{{hobj.next_page}}"></a>
+</div>
 % end
-<!-- 
+<!--
 </div>
 -->
 

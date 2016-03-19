@@ -216,6 +216,7 @@ class ComicHost(Bottle):
         fx = os.path.join(fx[0], "bmc_"+fx[1])
 	print "fx3", fx
         hobj.image_src = os.path.join(os.sep, STATIC_CACHE_PREFIX, path, fx)
+        #hobj.image_src = os.path.join(os.sep, STATIC_CACHE_PREFIX, path, "bmc_"+files[page])
 
         hobj.pages = pages
         hobj.prev_page = pages[page-2] 
