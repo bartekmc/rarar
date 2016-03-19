@@ -240,9 +240,15 @@ class ComicHost(Bottle):
         hobj.dirs = None
         hobj.comics = None
         #hobj.image_src = os.path.join(os.sep, STATIC_CACHE_PREFIX, path, files[page])
-        fx = os.path.split(files[page])
+	fx = files[page]
+	fx = fx.replace('\\','/')
+	print "fx1", fx
+        fx = os.path.split(fx)
+	print "fx2", fx
         fx = os.path.join(fx[0], "bmc_"+fx[1])
+	print "fx3", fx
         hobj.image_src = os.path.join(os.sep, STATIC_CACHE_PREFIX, path, fx)
+        #hobj.image_src = os.path.join(os.sep, STATIC_CACHE_PREFIX, path, "bmc_"+files[page])
 
         hobj.pages = pages
         hobj.prev_page = pages[page-2] 
