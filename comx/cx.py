@@ -165,10 +165,14 @@ class ComicHost(Bottle):
 
 #    @route(STATIC_CACHE_PREFIX + '/<path:path>')
     def staticfile_cache(self, path):
+        resize = request.query.resize
+        print "staticfile_cache:", path, resize
         return static_file(path, CACHE_PATH)
 
 #    @route(STATIC_PREFIX + '/<path:path>')
     def staticfile(self, path):
+        resize = request.query.resize
+        print "staticfile:", path, resize
         return static_file(path, os.curdir)
 
     def unpack(self, path_file, path_cache, page=0):
