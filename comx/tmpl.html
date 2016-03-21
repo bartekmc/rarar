@@ -230,8 +230,18 @@ $(".page_menu").click(function(){
 
 <div class="container">
 <div class="row">
+
 %if hobj.dirs is not None:
 <ul class="list-group">
+% if hobj.folder_back is not None:
+
+  <li class="list-group-item">
+    <span class="glyphicon glyphicon glyphicon-arrow-left"></span> 
+    <a href="{{hobj.folder_back}}">..</a>
+
+</li>
+% end
+
 % for d in hobj.dirs:
   <li class="list-group-item">
     <span class="glyphicon glyphicon-folder-open"></span> 

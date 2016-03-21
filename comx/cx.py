@@ -100,6 +100,7 @@ class HtmlObj:
         self.prev_page = "2"
         self.cur_page = "2"
         self.next_page = "2"
+        self.folder_back = None
 
 
 class ComicHost(Bottle):
@@ -395,14 +396,15 @@ class ComicHost(Bottle):
             i.link = os.path.join('/r/', path, d)
             dirs.append(i)
 
-        i = Item()
-        i.name = "COFNIJ"
-        i.link = os.path.join('/r/', os.path.split(path)[0])
-        if len(dirs) > 0:
-            dirs.insert(0, i)
-        else:
-            files.insert(0, i)
+#        i = Item()
+#        i.name = "COFNIJ"
+#        i.link = os.path.join('/r/', os.path.split(path)[0])
+#        if len(dirs) > 0:
+#            dirs.insert(0, i)
+#        else:
+#            files.insert(0, i)
 
+        hobj.folder_back = os.path.join('/r/', os.path.split(path)[0])
         hobj.dirs = dirs
         hobj.comics = files
         hobj.pagers = None
