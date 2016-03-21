@@ -217,11 +217,10 @@ class ComicHost(Bottle):
             xxfiles = rf.namelist()
 
             xpage = page
-            if xpage ==999:
+            if xpage == 999:
                 xpage = len(xxfiles)-1
             t = threading.Thread(target=self.unpack, args=(path_file, path_cache, xpage))
             t.start()
-
 
             for f in xxfiles:
                 if "bmc_" not in f:
@@ -239,29 +238,31 @@ class ComicHost(Bottle):
         for f in files:
             p = os.path.join(os.sep, 'f/', path, 'page', str(x))
             pages.append(p)
-            x+=1
+            x += 1
 
         back_link = os.path.join('/r/', os.path.split(path)[0])
 
-        if page ==999:
+        if page == 999:
             page = len(files)-1
         hobj.dirs = None
         hobj.comics = None
         #hobj.image_src = os.path.join(os.sep, STATIC_CACHE_PREFIX, path, files[page])
 	fx = files[page]
 	fx = fx.replace('\\','/')
-	print "fx1", fx
         fx = os.path.split(fx)
-	print "fx2", fx
         fx = os.path.join(fx[0], "bmc_"+fx[1])
-	print "fx3", fx
         hobj.image_src = os.path.join(os.sep, STATIC_CACHE_PREFIX, path, fx)
         #hobj.image_src = os.path.join(os.sep, STATIC_CACHE_PREFIX, path, "bmc_"+files[page])
 
         hobj.pages = pages
         hobj.prev_page = pages[page-2] 
         hobj.cur_page = pages[page-1] 
-        hobj.next_page = pages[page]
+        print "00:", page, len(pages)
+        if page >= len(pages)-1:
+            hobj.next_page = pages[page-1]
+        else:
+            hobj.next_page = pages[page]
+            
         hobj.last_page = '2' 
         hobj.back_link = back_link
 
@@ -275,10 +276,10 @@ class ComicHost(Bottle):
         x = os.path.join('/s/r/', path)
         hobj.saveX_link = urllib.quote(x)
         print "ZZZZ", len(pages), page
-        if (page >= len(pages)):
-            self.saveX(hobj.saveX_link, 999)
+        if (page >= len(pages)-1):
+            self.saveX(urllib.quote(path), 999)
         else:
-            self.saveX(hobj.saveX_link, page)
+            self.saveX(urllib.quote(path), page)
         
         if os.path.isfile(path_file):
             return template(templ, hobj=hobj)
@@ -380,8 +381,13 @@ class ComicHost(Bottle):
             #print path, f
             last_page = 1
             for lz in flines:
-                if os.path.join(path, f) in lz:
-                    last_page = int(lz.split(',')[1])
+                print "db:", path, f, os.path.join(path, f), lz
+                if path == os.curdir:
+                    if f in lz:
+                        last_page = int(lz.split(',')[1])
+                else:
+                    if os.path.join(path, f) in lz:
+                        last_page = int(lz.split(',')[1])
             fo.close()
             if last_page == 999:
                 i.finished_icon = True 
