@@ -244,6 +244,10 @@ class ComicHost(Bottle):
 
         if page == 999:
             page = len(files)-1
+
+        if page >= len(files):
+            page = len(files)-1
+
         hobj.dirs = None
         hobj.comics = None
         #hobj.image_src = os.path.join(os.sep, STATIC_CACHE_PREFIX, path, files[page])
